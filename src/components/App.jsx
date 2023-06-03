@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { ContactForm } from './ContactForm';
 import { ContactList } from './ContactList';
 import { Filter } from './Filter';
+import PropTypes from 'prop-types';
 
 export class App extends Component {
   state = {
@@ -27,7 +28,7 @@ export class App extends Component {
     );
 
     if (isDuplicate) {
-      alert(`Контакт з ім'ям ${newContact.name} вже існує!`);
+      alert(`${newContact.name} is already in contacts!`);
       return;
     }
 
@@ -62,3 +63,17 @@ export class App extends Component {
     );
   }
 }
+
+App.propTypes = {
+  contacts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      number: PropTypes.string.isRequired,
+    })
+  ),
+  filter: PropTypes.string,
+  handleDeleteContact: PropTypes.func,
+  addContact: PropTypes.func,
+  handleFilterChange: PropTypes.func,
+};

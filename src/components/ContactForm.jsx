@@ -1,27 +1,18 @@
 import React, { Component } from 'react';
+import * as Yup from 'yup';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import PropTypes from 'prop-types';
 import { nanoid } from 'nanoid';
 
+const validationSchema = Yup.object().shape({
+  name: Yup.string().required('Name is required'),
+  number: Yup.string().required('Number is required'),
+});
+
 export class ContactForm extends Component {
-  state = {
-    name: '',
-    number: '',
-  };
-
-  handleNameChange = e => {
-    this.setState({ name: e.target.value });
-  };
-
-  handleNumberChange = e => {
-    this.setState({ number: e.target.value });
-  };
-
-  handleSubmit = e => {
-    e.preventDefault();
-
-    const { name, number } = this.state;
-    if (name.trim() === '' || number.trim() === '') {
-      return;
-    }
+  handleSubmit = (values, { resetForm }) => {
+    const { addContact } = this.props;
+    const { name, number } = values;
 
     const newContact = {
       id: nanoid(),
@@ -29,36 +20,37 @@ export class ContactForm extends Component {
       number: number.trim(),
     };
 
-    this.props.addContact(newContact);
-    this.setState({ name: '', number: '' });
+    addContact(newContact);
+    resetForm();
   };
 
   render() {
-    const { name, number } = this.state;
-
     return (
-      <form onSubmit={this.handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-          title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-          required
-          value={name}
-          onChange={this.handleNameChange}
-        />
-        <input
-          type="tel"
-          name="number"
-          pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-          title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-          required
-          value={number}
-          onChange={this.handleNumberChange}
-        />
+      <Formik
+        initialValues={{ name: '', number: '' }}
+        validationSchema={validationSchema}
+        onSubmit={this.handleSubmit}
+      >
+        <Form>
+          <div>
+            <label htmlFor="name">Name:</label>
+            <Field type="text" id="name" name="name" />
+            <ErrorMessage name="name" component="div" className="error" />
+          </div>
 
-        <button type="submit">Add contact</button>
-      </form>
+          <div>
+            <label htmlFor="number">Number:</label>
+            <Field type="tel" id="number" name="number" />
+            <ErrorMessage name="number" component="div" className="error" />
+          </div>
+
+          <button type="submit">Add contact</button>
+        </Form>
+      </Formik>
     );
   }
 }
+
+ContactForm.propTypes = {
+  addContact: PropTypes.func.isRequired,
+};
